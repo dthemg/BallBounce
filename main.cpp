@@ -1,24 +1,28 @@
 #include <Ball.h>
 #include <SFML/Graphics.hpp>
 #include <iostream>
-
+#include <math.h>
 
 using namespace std;
 
 int main()
 {
-	const float S = 50.f; // Window scaling
-
-	const int height = 800;
-	const int width = 800;
+	const float S = 5.f; // Window scaling
+	const float speedLossFactor = 0.70;
+	const int height = 800.f;
+	const int width = 800.f;
 	const float G = 9.81/S;
-	float radius = 50.f;
+	float radius = 30.f;
+
+	float initX = 0.f;
+	float initY = 0.f;
 
 	bool ballExist = false;
+	bool firstClick = false;
 
 	sf::RenderWindow window(sf::VideoMode(height, width), "Bouncing ball");
 	window.setFramerateLimit(60);
-	Ball ball(50, 200, 200);
+	Ball ball(radius, 200.f, 200.f);
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -29,11 +33,18 @@ int main()
 				window.close();
 			}
 				
-			if (event.type == sf::Event::MouseButtonPressed)
-			{
-				sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+			if (!firstClick && event.type == sf::Event::MouseButtonPressed) {
+				firstClick = true;
+				sf::Vector2f initPosition = sf::Vector2f(sf::Mouse::getPosition(window));
+				initX = initPosition.x;
+				initY = initPosition.y;
+			} else if (firstClick && event.type == sf::Event::MouseButtonPressed) {
+				sf::Vector2f localPosition = sf::Vector2f(sf::Mouse::getPosition(window));
 				ball.x = localPosition.x;
 				ball.y = localPosition.y;
+				ball.vx = (localPosition.x - initX)/S;
+				ball.vy = (localPosition.y - initY)/S;
+
 				ballExist = true;
 			}
 		}
@@ -48,13 +59,25 @@ int main()
 
 			// Collision floor, TODO - add mirroring of x, y points
 			if (ball.y > height - radius) {
-				ball.vy = -ball.vy;
-				ball.y -= (ball.y + radius - height);
+				ball.vy = -ball.vy*speedLossFactor;
+				ball.y -= 2 * (ball.y - (height - radius));
 			}
-			else if (ball.y < 0) {
-				ball.vy = -ball.vy;
-				ball.y = -ball.y;
+			// Collision roof
+			else if (ball.y < radius) {
+				ball.vy = -ball.vy*speedLossFactor;
+				ball.y -= 2 * (ball.y - radius);//   -ball.y;
 			}
+			// Collision left wall
+			if (ball.x < radius) {
+				ball.vx = -ball.vx*speedLossFactor;
+				ball.x -= 2 * (ball.x - radius);
+			}
+			// Collision right wall
+			else if (ball.x > width - radius) {
+				ball.vx = -ball.vx*speedLossFactor;
+				ball.x -= 2*(ball.x - (width - radius));
+			}
+			
 
 			ball.draw(window);
 		}

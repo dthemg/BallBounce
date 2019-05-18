@@ -5,12 +5,12 @@
 
 class Ball {
 public:
-	float x = 0;
-	float y = 0;
-	float vx = 0;
-	float vy = 0;
-	float radius = 100;
-	float M = 1; // 100 kg
+	float x = 0.f;
+	float y = 0.f;
+	float vx = 0.f;
+	float vy = 0.f;
+	float radius = 30.f;
+	float M = 1.f; // 100 kg
 
 	Ball() {
 		// Default constructor
@@ -20,7 +20,6 @@ public:
 		radius = radius;
 		x = startX;
 		y = startY;
-		
 	}
 
 	void draw(sf::RenderWindow& window) {
